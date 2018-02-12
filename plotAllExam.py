@@ -1,5 +1,7 @@
 import ROOT as r
 
+author = "__pm__"
+
 r.gROOT.SetBatch(True)
 
 f=r.TFile("ExamHistograms.root")
