@@ -1,0 +1,10 @@
+#Create histograms for exam marks
+./runall_root.sh
+
+#Produce plots with marks and correlations
+python plotAllExam.py
+
+exal_2.py => single exam analysis (produce histos and text output for an exam, CDS and a given year. For full analysis runall_2.sh)
+
+exal_root.py => all exams analysis (produce all histos and correlations for a CDS and a given year)
+

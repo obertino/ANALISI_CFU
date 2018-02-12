@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+
+###########################################################################
+#
+# Calcola quanti hanno superato l'esame per insegnamento
+#
+###########################################################################
+
 __author__ = 'lello'
 
 import csv
@@ -9,7 +16,6 @@ import numpy as np
 # IMPORTANT: The input file must be sorted with the Student ID.
 
 filename = sys.argv[1]
-
 YEAR = sys.argv[2]
 EXAM = sys.argv[3]
 IDList = []
@@ -23,14 +29,13 @@ FullStudentList = []
 ID_col = 9 
 EXAMID_col = 14
 CFU_col = 16
-
 Score_col = 17
 Course_col = 2
 Date_col = 20
 Passed_col = 22
 
 #with open(filename,'rt',encoding="utf8") as f:
-with open(filename,'rt') as f:
+with open(filename,'rt') as f: 
     #mycsv = csv.reader(f,delimiter=';',quoting=csv.QUOTE_NONNUMERIC)
     mycsv = csv.reader(f,delimiter=',')
     origcsv = list(mycsv)
@@ -59,24 +64,21 @@ with open(filename,'rt') as f:
 # Some statistics
 StudentSet = set(tuple(x) for x in FullStudentList)
 print("Student number: ", len(StudentSet))
-
 CDSID = ['001702', '001703', '001717', '001711']
 c = [0, 0, 0, 0]
 for k in range(len(c)):
     for s in StudentSet:
         c[k] += s.count(CDSID[k])
-for i in range(len(c)):
-    print(CDSID[i], " students: ", c[i])
+#for i in range(len(c)):
+#    print(CDSID[i], " students: ", c[i])
 
 CDS_NStudents = {'001702': c[0], '001703' : c[1], '001717': c[2], '001711': c[3]}
-
 
 # Processing data
 ExamSet_SFA = set([ 'AGR0048', 'AGR0004', 'AGR0007', 'AGR0047', 'SAF0050', 'AGR0051', 'AGR0008', 'AGR0059', 'AGR0020'])
 ExamSet_STA = set([ 'AGR0048', 'AGR0004', 'AGR0007', 'AGR0047', 'SAF0050', 'AGR0051', 'AGR0008', 'AGR0055', 'AGR0025'])
 ExamSet_TAL = set([ 'AGR0395', 'AGR0027', 'AGR0025', 'AGR0011', 'SAF0050', 'AGR0017', 'AGR0016', 'AGR0012', 'AGR0045', 'AGR0295'])
 ExamSet_VE = set([ 'AGR0395', 'AGR0027', 'AGR0025', 'AGR0138', 'AGR0011', 'SAF0050', 'AGR0017', 'AGR0016', 'AGR0012', 'AGR0331', 'AGR0295'])
-
 
 ControlSet = set([EXAM])
 #ControlSet = set(['AGR0138'])
@@ -86,13 +88,12 @@ ExamSet = dict([('001702', ExamSet_VE.intersection(ControlSet)) ,
                 ('001717', ExamSet_STA.intersection(ControlSet)), 
                 ('001711', ExamSet_SFA.intersection(ControlSet)) ])
 
-
 FinalList = []
 CDSFinalList = dict([('001702', []),('001703',[]),('001717',[]),('001711',[])])
 
-
 score = 0
 i0 = -1
+#MO i loop over the students 
 for i in range(len(IDList)-1):
     #print(" ID ",  IDList[i])
     if (IDList[i+1] == IDList[i]): 
@@ -104,22 +105,25 @@ for i in range(len(IDList)-1):
         if (i0 == -1):
             i0 = i1
         s = 0
+#MO score initialized        
+        score=0
+        #MO k runs over the exames
         for k in range(i0,i1+1):
             #print(IDList[k], ExamIDList[k], len(ExamIDList[k]))
-
             if ExamIDList[k] in ExamSet[CourseList[k]] and DateList[k] <= YEAR:
                 #print(IDList[k], ExamIDList[k], CFUList[k])
                 s += CFUList[k]
-                if CourseList[i] == "001702":
-                    score = ScoreList[k]
-                    print(score, CourseList[i])
-
-        CDSFinalList[CourseList[i]].append([IDList[i], s])
+# MO Add score and eliminate print for VE
+                score = ScoreList[k]
+                #if CourseList[i] == "001702":
+                #    score = ScoreList[k]
+                #    print(score, CourseList[i])
+# MO add score in CDSFinalList 
+        CDSFinalList[CourseList[i]].append([IDList[i], s, score])
         #s =  sum(CFUList[i0:i1+1])
         FinalList.append([IDList[i], s])
         #print(IDList[i], s, i0, i1)
         #print(IDList[i], s)
-
         # reset counter
         i0 = -1
 
@@ -135,10 +139,17 @@ FinalList.sort(key=lambda x: x[1], reverse=True)
 for k in ['001702', '001703', '001717', '001711']:
     CDSFinalList[k].sort(key=lambda x: x[1], reverse=True)
     exl = [row[1] for row in CDSFinalList[k]] 
-
+#MO Add score    
+    exlscore = [row[2] for row in CDSFinalList[k]]
     # Numer of students that have passed the exam
     sxl = (np.asarray(exl) > 0).sum()
-    res = '%s: %d / %d; %.1f' % (k, sxl, CDS_NStudents[k], float(sxl)/CDS_NStudents[k]*100)
+#MO Add average score
+    if (sxl > 0):
+        avg_score = float(np.asarray(exlscore).sum())/sxl
+    else:
+        avg_score = 0.
+    res = '%s %s %s %d %d %.1f %.1f' % (k, EXAM, YEAR, sxl, CDS_NStudents[k], float(sxl)/CDS_NStudents[k]*100, avg_score)
+    #res = '%s: %d / %d; %.1f' % (k, sxl, CDS_NStudents[k], sxl/CDS_NStudents[k]*100)
     print(res)
     #for l in CDSFinalList[k]:
     #    res = '%s; %d; %d ' % (k, l[0], l[1])
