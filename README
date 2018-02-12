@@ -8,3 +8,9 @@ exal_2.py => single exam analysis (produce histos and text output for an exam, C
 
 exal_root.py => all exams analysis (produce all histos and correlations for a CDS and a given year)
 
+#comandi git
+git add NewFileToLocalRepository #add a new file to local repository
+git status #check which modified files need to be committed and which are the untracked files
+git commit -m "MyModifications" -a #commit all modified files
+git remote -v #check which are the remote repositories linked to this repository 
+git push origin master #push modifications to remote repository and branch in this case "origin" and "master"
