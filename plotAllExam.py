@@ -1,6 +1,7 @@
 import ROOT as r
+import os
 
-author = "__pm__"
+author = "__pmo__"
 
 r.gROOT.SetBatch(True)
 
@@ -17,6 +18,10 @@ exams['001703'] = ['AGR0395', 'AGR0027', 'AGR0011', 'AGR0017', 'AGR0016', 'AGR00
 c1=r.TCanvas("c1","c1",900,600)
 #r.SetStyle("Plain")
 
+#create destination subfolders for cds
+for cds in CDSlist:
+    os.system("mkdir -p %s"%(cds))
+
 for cds in CDSlist:
     for exam in exams[cds]:
         print "%s_%s"%(exam,exams[cds].index(exam)+1) 
@@ -25,7 +30,7 @@ for cds in CDSlist:
             a.GetXaxis().SetTitle("Voto %s"%exam)
             a.Rebin(2)
             a.Draw()
-            c1.SaveAs("%s-%s.png"%(exam,cds))
+            c1.SaveAs("%s/%s-%s.png"%(cds,exam,cds))
 
 corr_plot=dict()
 for cds in CDSlist:
@@ -42,14 +47,14 @@ for cds in CDSlist:
 #                a.Rebin(2)
                 a.Draw("COLZ")
                 corr_plot[cds].SetBinContent(exams[cds].index(ex)+1,exams[cds].index(ex1)+1,a.GetCorrelationFactor())
-                c1.SaveAs("%s_vs_%s-%s.png"%(ex,ex1,cds))
+                c1.SaveAs("%s/%s_vs_%s-%s.png"%(cds,ex,ex1,cds))
 
 r.gStyle.SetPalette(56)
             
 for cds in CDSlist:
     corr_plot[cds].SetStats(0)
     corr_plot[cds].Draw("COLZ")
-    c1.SaveAs("corr_%s.png"%(cds))
+    c1.SaveAs("%s/corr_%s.png"%(cds,cds))
 
 for cds in CDSlist:
     print "=========== %s =========="%(cds)
